@@ -20,7 +20,7 @@ public class Evento {
     private int vagasTotais;
     private TipoEvento tipo;
     private Professor criador;
-    private List<Inscricao> incricoes;
+    private List<Inscricao> inscricoes;
     private String categoria;
 
     public Evento(String titulo, String descricao, String palestrante, LocalDateTime dataHora, int vagas,
@@ -34,7 +34,7 @@ public class Evento {
         this.vagasTotais = vagas;
         this.tipo = tipo;
         this.criador = criador;
-        this.incricoes = new ArrayList<>();
+        this.inscricoes = new ArrayList<>();
         this.categoria = categoria;
         this.id = contadorId++;
     }
@@ -82,7 +82,7 @@ public class Evento {
     public void setVagasTotais(int vagas)
     {
         this.vagasTotais = vagas;
-        this.vagasDisponiveis = vagas - incricoes.size();
+        this.vagasDisponiveis = vagas - inscricoes.size();
     }
     public int getId()
     {
@@ -93,5 +93,70 @@ public class Evento {
     {
         return tipo;
     }
+
+    public void setTipo(TipoEvento tipo)
+    {
+        this.tipo = tipo;
+    }
+
+    public Professor getCriador()
+    {
+        return criador;
+    }
+
+    public List<Inscricao> getInscricoes()
+    {
+        return new ArrayList<>(inscricoes);
+    }
+
+    public String getCategoria()
+    {
+        return  categoria;
+    }
+
+    public void setCategoria(String categoria)
+    {
+        this.categoria = categoria;
+    }
+
+    public String getTitulo()
+    {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo)
+    {
+        this.titulo = titulo;
+    }
+
+    public void adicionarInscricao(Inscricao inscricao)
+    {
+        inscricoes.add(inscricao);
+        vagasDisponiveis--;
+    }
+
+    public void removerInscricao(Inscricao inscricao)
+    {
+        inscricoes.remove(inscricao);
+        vagasDisponiveis++;
+    }
+
+    public boolean temVagasDsiponiveis()
+    {
+        return vagasDisponiveis > 0;
+    }
+
+    @Override
+    public String toString()
+    {
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return String.format("[%s] %s\nPalestrante: %s | Data: %s | Vagas: %d/%d\nCategoria: %s",
+                tipo.getDescricao(), titulo, palestrante, dataHora.format(f),
+                vagasDisponiveis, vagasTotais, categoria);
+    }
+
+
+
+
 
 }
