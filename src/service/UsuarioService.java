@@ -39,23 +39,23 @@ public class UsuarioService {
         return administrador;
     }
 
-    public Usuario buscarPorId(int id) throws UsuarioNaoEncontrado
+    public Usuario buscarPorId(int id) throws UsuarioNaoEncontradoException
     {
         return usuarios.stream()
                 .filter(u -> u.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new UsuarioNaoEncontrado("Usuário não encontrado: ID " + id));
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado: ID " + id));
     }
 
-    public Usuario buscarPorEmail(String email) throws UsuarioNaoEncontrado
+    public Usuario buscarPorEmail(String email) throws UsuarioNaoEncontradoException
     {
         return usuarios.stream()
                 .filter(u -> u.getEmail().equalsIgnoreCase(email))
                 .findFirst()
-                .orElseThrow(() -> new UsuarioNaoEncontrado("Usuário não encontrado: " + email));
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado: " + email));
     }
 
-    public void removerUsuario(int id) throws UsuarioNaoEncontrado
+    public void removerUsuario(int id) throws UsuarioNaoEncontradoException
     {
         Usuario usuario = buscarPorId(id);
         usuarios.remove(usuario);

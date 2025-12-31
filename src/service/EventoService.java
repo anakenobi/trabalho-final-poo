@@ -5,7 +5,7 @@ import model.evento.Evento;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import model.*;
+
 import exception.*;
 import model.evento.TipoEvento;
 import model.usuario.Professor;
@@ -33,7 +33,7 @@ public class EventoService {
 
     public void editarEvento(int id, String titulo, String descricao, String palestrante, LocalDateTime dataHora,
                              int vagas, String categoria)
-            throws EventoNaoEcontrado
+            throws EventoNaoEncontradoException
     {
         Evento evento = buscarPorId(id);
         evento.setTitulo(titulo);
@@ -45,18 +45,18 @@ public class EventoService {
 
     }
 
-    public void removerEvento(int id) throws EventoNaoEcontrado
+    public void removerEvento(int id) throws EventoNaoEncontradoException
     {
         Evento evento = buscarPorId(id);
         eventos.remove(evento);
     }
 
-    public Evento buscarPorId(int id) throws EventoNaoEcontrado
+    public Evento buscarPorId(int id) throws EventoNaoEncontradoException
     {
         return eventos.stream()
                 .filter(e -> e.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new EventoNaoEcontrado("Evento não encontrado: ID " + id));
+                .orElseThrow(() -> new EventoNaoEncontradoException("Evento não encontrado: ID " + id));
     }
 
     public List<Evento> listarTodos()

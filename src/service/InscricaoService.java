@@ -17,9 +17,9 @@ public class InscricaoService {
         this.inscricoes = new ArrayList<>();
     }
 
-    public Inscricao inscreverAluno(Aluno aluno, Evento evento) throws EventoLotado, InscricaoNaoEncontrada {
+    public Inscricao inscreverAluno(Aluno aluno, Evento evento) throws EventoLotadoException, InscricaoNaoEncontradaException {
         if (!evento.temVagasDsiponiveis()) {
-            throw new EventoLotado("Evento lotado: " + evento.getTitulo());
+            throw new EventoLotadoException("Evento lotado: " + evento.getTitulo());
         }
 
         Inscricao inscricao = new Inscricao(aluno, evento);
@@ -31,18 +31,18 @@ public class InscricaoService {
 
     }
 
-    public Inscricao buscarPorId(int id) throws InscricaoNaoEncontrada {
+    public Inscricao buscarPorId(int id) throws InscricaoNaoEncontradaException {
         return inscricoes.stream()
                 .filter(i -> i.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new InscricaoNaoEncontrada("Inscrição não encontrada: ID" + id));
+                .orElseThrow(() -> new InscricaoNaoEncontradaException("Inscrição não encontrada: ID" + id));
     }
 
-    public void cancelarInscricao(int inscricaoId) throws InscricaoNaoEncontrada, CancelamentoForaDoPrazo {
+    public void cancelarInscricao(int inscricaoId) throws InscricaoNaoEncontradaException, CancelamentoForaDoPrazoException {
         Inscricao inscricao = buscarPorId(inscricaoId);
 
         if (inscricao == null) {
-            throw new InscricaoNaoEncontrada("Não foi encontrada nenhuma inscrição com o ID: " + inscricaoId);
+            throw new InscricaoNaoEncontradaException("Não foi encontrada nenhuma inscrição com o ID: " + inscricaoId);
         }
 
         if(inscricao.isCancelada())
@@ -54,7 +54,7 @@ public class InscricaoService {
 
         if(horasAteEvento < Constantes.HORAS_MINIMAS_CANCELAMENTO)
         {
-            throw new CancelamentoForaDoPrazo("Cancelamento deve ser feito com " + Constantes.HORAS_MINIMAS_CANCELAMENTO + " horas de antecedência");
+            throw new CancelamentoForaDoPrazoException("Cancelamento deve ser feito com " + Constantes.HORAS_MINIMAS_CANCELAMENTO + " horas de antecedência");
         }
 
         inscricao.setCancelada(true);
