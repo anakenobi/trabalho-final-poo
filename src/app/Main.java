@@ -6,173 +6,213 @@ import model.evento.TipoEvento;
 import model.usuario.Administrador;
 import model.usuario.Aluno;
 import model.usuario.Professor;
+import model.usuario.Usuario;
 import service.*;
 import exception.*;
 import util.GeradorRelatorio;
 import java.time.LocalDateTime;
+import java.util.Scanner;
 
 public class Main {
+
+    private static Scanner sc = new Scanner(System.in);
+    private static UsuarioService usuarioService = new UsuarioService();
+    private static EventoService eventoService = new EventoService();
+    private static InscricaoService inscricaoService = new InscricaoService();
+    private static NotificacaoService notificacaoService = new NotificacaoService();
+    private static Usuario usuarioLogado = null;
+
     public static void main(String[] args) {
-        System.out.println("=== SISTEMA DE GERENCIAMENTO DE EVENTOS UNIVERSITÁRIOS ===\n");
 
-        UsuarioService usuarioService = new UsuarioService();
-        EventoService eventoService = new EventoService();
-        InscricaoService inscricaoService = new InscricaoService();
-        NotificacaoService notificacaoService = new NotificacaoService();
+        System.out.println("********************************************************");
+        System.out.println("SISTEMA DE GERENCIAMENTO DE EVENTOS UNIVERSITÁRIOS ");
+        System.out.println("********************************************************");
 
-        Inscricao insc2 = null;
-        try {
-            // Cadastro de usuários
-            System.out.println("📝 Cadastrando usuários...");
-            Aluno aluno1 = usuarioService.cadastrarAluno("João Silva", "joao@email.com", "123", "20231001");
-            Aluno aluno2 = usuarioService.cadastrarAluno("Maria Santos", "maria@email.com", "123", "20231002");
-            Professor prof1 = usuarioService.cadastrarProfessor("Dr. Carlos", "carlos@email.com", "123", "Computação");
-            Professor prof2 = usuarioService.cadastrarProfessor("Dra. Ana", "ana@email.com", "123", "Matemática");
-            Administrador admin = usuarioService.cadastrarAdministrador("Admin Sistema", "admin@email.com", "123", "Coordenador");
-            System.out.println("✅ Usuários cadastrados com sucesso!\n");
-
-            // Criação de eventos
-            System.out.println("🎯 Criando eventos...");
-            Evento evento1 = eventoService.criarEvento(
-                    "Introdução à Inteligência Artificial",
-                    "Palestra sobre os fundamentos de IA",
-                    "Dr. Carlos",
-                    LocalDateTime.now().plusDays(7),
-                    30,
-                    TipoEvento.PALESTRA,
-                    prof1,
-                    "Tecnologia"
-            );
-
-            Evento evento2 = eventoService.criarEvento(
-                    "Workshop de Python",
-                    "Aprenda Python do zero",
-                    "Dra. Ana",
-                    LocalDateTime.now().plusDays(10),
-                    20,
-                    TipoEvento.WORKSHOP,
-                    prof2,
-                    "Programação"
-            );
-
-            Evento evento3 = eventoService.criarEvento(
-                    "Minicurso de Machine Learning",
-                    "Conceitos práticos de ML",
-                    "Dr. Carlos",
-                    LocalDateTime.now().plusDays(15),
-                    25,
-                    TipoEvento.MINICURSO,
-                    prof1,
-                    "Tecnologia"
-            );
-            System.out.println("✅ Eventos criados com sucesso!\n");
-
-            // Notificar novo evento
-            System.out.println("📢 Enviando notificações de novos eventos...");
-            notificacaoService.notificarNovoEvento(evento1, usuarioService.listarTodos());
-            System.out.println();
-
-            // Inscrições
-            System.out.println("✍️ Realizando inscrições...");
-            try {
-                Inscricao insc1 = inscricaoService.inscreverAluno(aluno1, evento1);
-
-
-                Inscricao insc3 = inscricaoService.inscreverAluno(aluno2, evento1);
-                Inscricao insc4 = inscricaoService.inscreverAluno(aluno2, evento3);
-                System.out.println("✅ Inscrições realizadas com sucesso!\n");
-            } catch (EventoLotado e) {
-                System.out.println("Erro: Não há vagas disponíveis para esse evento " + e.getMessage());
-            } catch (InscricaoNaoEncontrada e) {
-                System.out.println("Erro de dados: " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("Erro inesperado ao realizar inscrição: " + e.getMessage());
+        boolean continuar = true;
+        while (continuar) {
+            if (usuarioLogado == null) {
+                continuar = menuPrincipal();
+            } else {
+                continuar = menuUsuarioLogado();
             }
-            // Listar eventos disponíveis
-            System.out.println("📋 EVENTOS DISPONÍVEIS:");
-            for (Evento e : eventoService.listarTodos()) {
-                System.out.println(e);
-                System.out.println("Inscritos: " + e.getInscricoes().size());
-                System.out.println("---");
-            }
-            System.out.println();
-
-            // Buscar eventos por categoria
-            System.out.println("🔍 Buscando eventos de 'Tecnologia':");
-            for (Evento e : eventoService.buscarPorCategoria("Tecnologia")) {
-                System.out.println("- " + e.getTitulo());
-            }
-            System.out.println();
-
-            // Listar inscritos em um evento
-            System.out.println("👥 Inscritos no evento '" + evento1.getTitulo() + "':");
-            for (Inscricao i : evento1.getInscricoes()) {
-                System.out.println("- " + i.getAluno().getNome());
-            }
-            System.out.println();
-
-            // Editar evento
-            System.out.println("✏️ Editando evento...");
-            try {
-                eventoService.editarEvento(evento1.getId(),
-                        "Introdução à IA e ML",
-                        "Palestra sobre IA e Machine Learning",
-                        "Dr. Carlos",
-                        evento1.getDataHora(),
-                        35,
-                        "Tecnologia"
-                );
-                notificacaoService.notificarAlteracaoEvento(evento1);
-                System.out.println("Evento atualizado e usuários notificados! ");
-            } catch (EventoNaoEcontrado e) {
-                System.out.println("erro ao editar: " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("Erro inesperado: " + e.getMessage());
-            }
-
-            notificacaoService.notificarAlteracaoEvento(evento1);
-            System.out.println();
-
-            // Cancelar inscrição (vai falhar por estar fora do prazo em produção real)
-            System.out.println("❌ Tentando cancelar inscrição...");
-            try {
-                if (insc2 != null) {
-                    inscricaoService.cancelarInscricao(insc2.getId());
-                    System.out.println("Inscrição cancelada com sucesso!");
-                }
-            } catch (InscricaoNaoEncontrada e) {
-                System.out.println("❌ Erro de busca:" + e.getMessage());
-            } catch (CancelamentoForaDoPrazo e) {
-                System.out.println("Erro de prazo: " + e.getMessage());
-            }
-
-            System.out.println();
-
-            // Relatórios
-            System.out.println("📊 GERANDO RELATÓRIOS:");
-            GeradorRelatorio.gerarRelatorioEventosPopulares(eventoService.listarTodos());
-            GeradorRelatorio.gerarRelatorioPorAluno(usuarioService.listarAlunos());
-            GeradorRelatorio.gerarEstatisticasGerais(
-                    usuarioService.listarTodos(),
-                    eventoService.listarTodos(),
-                    inscricaoService.listarTodas()
-            );
-
-            // Teste de exceção - evento lotado
-            System.out.println("\n🧪 Testando evento lotado...");
-            Evento eventoLotado = eventoService.criarEvento(
-                    "Evento Teste Lotado",
-                    "Teste",
-                    "Teste",
-                    LocalDateTime.now().plusDays(5),
-                    0,
-                    TipoEvento.PALESTRA,
-                    prof1,
-                    "Teste"
-            );
-        } catch (Exception e){
-            System.out.println("Erro no sistema: " + e.getMessage());
-            e.printStackTrace();
         }
+        System.out.println("\n Obrigada por usar o sistema! ");
+        sc.close();
+
     }
-}
+
+
+
+        private static boolean menuPrincipal()
+        {
+            System.out.println("-----MENU PRINCIPAL-----");
+            System.out.println("1. Login");
+            System.out.println("2. Cadastrar como aluno");
+            System.out.println("3. Cadastrar como Professor");
+            System.out.println("4. Ver Eventos (sem login)");
+            System.out.println("0. Sair");
+
+            int opcao = lerInteiro();
+
+            switch (opcao){
+                case 1: realizarLogin();
+                break;
+                case 2: cadastrarAluno();
+                break;
+                case 3: cadastrarProfessor();
+                break;
+                case 4: listarEventosDisponiveis();
+                break;
+                case 0: return false;
+                default: System.out.println("Opção inválida");
+            }
+            return true;
+
+        }
+
+        private static boolean menuUsuarioLogado()
+        {
+            if (usuarioLogado instanceof Aluno){
+                return menuAluno();
+            } else if (usuarioLogado instanceof Professor) {
+                return menuProfessor();
+            } else if (usuarioLogado instanceof Administrador) {
+                return menuAdministrador();
+            }
+            return true;
+        }
+
+        private static boolean menuAluno(){
+            System.out.println("***************************");
+            System.out.println("MENU ALUNO");
+            System.out.println("****************************");
+            System.out.println("Bem vindo(a) " + usuarioLogado.getNome());
+            System.out.println("1. Ver eventos disponíveis");
+            System.out.println("2. Inscrever-se em evento");
+            System.out.println("3. Minhas inscrições");
+            System.out.println("4. Cancelar inscrição ");
+            System.out.println("5. Buscar Eventos ");
+            System.out.println("0. Logout");
+
+            int opcao = lerInteiro();
+
+            switch (opcao) {
+                case 1: listarEventosDisponiveis();
+                break;
+                case 2: inscreverEmEvento();
+                break;
+                case 3: verMinhasInscricoes();
+                break;
+                case 4: cancelarInscricao();
+                break;
+                case 5: buscarEventos();
+                break;
+                case 0:
+                    usuarioLogado = null;
+                    System.out.println("Logout realizado com sucesso!");
+                    break;
+                default: System.out.println("Opção inválida!");
+            }
+            return true;
+        }
+
+    private static boolean menuProfessor(){
+        System.out.println("***************************");
+        System.out.println("MENU Professor");
+        System.out.println("****************************");
+        System.out.println("Bem vindo(a) " + usuarioLogado.getNome());
+        System.out.println("1. Criar evento");
+        System.out.println("2. Meus eventos");
+        System.out.println("3. Editar evento");
+        System.out.println("4. Ver inscritos em evento");
+        System.out.println("5. Ver todos os eventos");
+        System.out.println("0. Logout");
+
+        int opcao = lerInteiro();
+
+        switch (opcao) {
+            case 1: criarEvento();
+                break;
+            case 2: verMeusEventos();
+                break;
+            case 3: editarEvento();
+                break;
+            case 4: verInscritosEvento();
+                break;
+            case 5: listarEventosDisponiveis();
+                break;
+            case 0:
+                usuarioLogado = null;
+                System.out.println("Logout realizado com sucesso!");
+                break;
+            default: System.out.println("Opção inválida!");
+        }
+        return true;
+    }
+
+    private static boolean menuAdministrador(){
+        System.out.println("***************************");
+        System.out.println("MENU Administrador");
+        System.out.println("****************************");
+        System.out.println("Bem vindo(a) " + usuarioLogado.getNome());
+        System.out.println("1. Gerenciar eventos");
+        System.out.println("2. Gerenciar usuários");
+        System.out.println("3. Relatórios");
+        System.out.println("4. Ver todos os eventos");
+        System.out.println("0. Logout");
+
+        int opcao = lerInteiro();
+
+        switch (opcao) {
+            case 1: gerenciarEventos();
+                break;
+            case 2: gerenciarUsuarios();
+                break;
+            case 3: gerarRelatorios();
+                break;
+            case 4: listarEventosDisponiveis();
+                break;
+            case 0:
+                usuarioLogado = null;
+                System.out.println("Logout realizado com sucesso!");
+                break;
+            default: System.out.println("Opção inválida!");
+        }
+        return true;
+    }
+
+    private static void realizarLogin()
+    {
+        System.out.println("\n>>> LOGIN <<<");
+        System.out.print("Email: ");
+        String email = sc.nextLine();
+
+        System.out.println("Senha: ");
+        String senha = sc.nextLine();
+
+        try{
+            Usuario usuario = usuarioService.buscarPorEmail(email);
+            if (usuario.getSenha().equals(senha)){
+                if(usuario.isAtivo()){
+                    usuarioLogado = usuario;
+                    System.out.println("\n Login realizado com sucesso");
+                    System.out.println("Bem vindo(a), " + usuario.getNome());
+                } else {
+                    System.out.println("\n Usuário desativado. Contate o administrador.")
+                }
+            }
+        }
+
+
+    }
+
+
+
+        }
+
+
+
+
+
+
+
