@@ -23,7 +23,7 @@ Esse sistema foi meu projeto final para a disciplina de Programção Orientada a
 ### Obs
 Professores e Administradores podem visualizar quem está inscrito, mas professor pode ver somente nos eventos que o próprio criou.
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Java 8+**
 - **Programação Orientada a Objetos (POO)**
@@ -31,7 +31,7 @@ Professores e Administradores podem visualizar quem está inscrito, mas professo
 - **Stream API**
 - **LocalDateTime API**
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - Java JDK 8 ou superior
