@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import model.*;
 import exception.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InscricaoService {
 
@@ -17,7 +18,18 @@ public class InscricaoService {
         this.inscricoes = new ArrayList<>();
     }
 
-    public Inscricao inscreverAluno(Aluno aluno, Evento evento) throws EventoLotadoException, InscricaoNaoEncontradaException {
+    public Inscricao inscreverAluno(Aluno aluno, Evento evento)
+            throws EventoLotadoException, InscricaoDuplicadaException {
+
+        boolean jaInscrito = inscricoes.stream()
+                .anyMatch(i -> i.getAluno().getId() == aluno.getId() &&
+                        i.getEvento().getId() == evento.getId() &&
+                        !i.isCancelada());
+
+        if (jaInscrito) {
+            throw new InscricaoDuplicadaException("Você já está inscrito neste evento.");
+        }
+
         if (!evento.temVagasDsiponiveis()) {
             throw new EventoLotadoException("Evento lotado: " + evento.getTitulo());
         }
@@ -28,7 +40,6 @@ public class InscricaoService {
         aluno.adicionarInscricao(inscricao);
 
         return inscricao;
-
     }
 
     public Inscricao buscarPorId(int id) throws InscricaoNaoEncontradaException {
@@ -69,6 +80,15 @@ public class InscricaoService {
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
+    public List<Inscricao> listarInscricoesAtivasFuturas(Aluno aluno) {
+        LocalDateTime agora = LocalDateTime.now();
+        return inscricoes.stream()
+                .filter(i -> i.getAluno().getId() == aluno.getId())
+                .filter(i -> !i.isCancelada())
+                .filter(i -> i.getEvento().getDataHora().isAfter(agora)) // Apenas o que ainda vai ocorrer
+                .collect(Collectors.toList());
+    }
+
     public List<Inscricao> listarPorEvento(Evento evento)
     {
         return inscricoes.stream()
@@ -79,6 +99,18 @@ public class InscricaoService {
     public List<Inscricao> listarTodas()
     {
         return new ArrayList<>(inscricoes);
+    }
+
+    public List<Inscricao> listarHistoricoParticipacao(Aluno aluno) {
+        LocalDateTime agora = LocalDateTime.now();
+
+        return inscricoes.stream()
+                .filter(i -> i.getAluno().getId() == aluno.getId())
+                .filter(i -> !i.isCancelada())
+                .filter(i -> i.getEvento().getDataHora().isBefore(agora))
+                .sorted((i1, i2) -> i2.getEvento().getDataHora()
+                        .compareTo(i1.getEvento().getDataHora()))
+                .collect(Collectors.toList());
     }
 
 }

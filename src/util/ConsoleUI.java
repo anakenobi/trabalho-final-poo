@@ -66,6 +66,7 @@ public class ConsoleUI {
         System.out.println("2. Gerenciar Usuários");
         System.out.println("3. Relatórios");
         System.out.println("4. Ver Todos os Eventos");
+        System.out.println("5. Ver inscritos nos Eventos");
         System.out.println("0. Logout");
         System.out.print("\nEscolha uma opção: ");
     }
