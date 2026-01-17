@@ -41,7 +41,7 @@ Professores e Administradores podem visualizar quem está inscrito, mas professo
 
 1. **Clone o repositório**
 ```bash
-git clone https://github.com/anakenobi/trabalho-final-poo.git
+git clone https://github.com/seu-usuario/trabalho-final-poo.git
 
 ```
 
