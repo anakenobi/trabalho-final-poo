@@ -1,6 +1,6 @@
 #  Sistema de Gerenciamento de Eventos Universitários
 
-Esse sistema foi meu projeto final para a disciplina de Programção Orientada a Objetos ministrada pelo professor Alan Lopes.  
+Este sistema foi meu projeto final para a disciplina de Programção Orientada a Objetos ministrada pelo professor Alan Lopes.  
 ## Funcionalidades
 
 ### Aluno
